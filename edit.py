@@ -1,4 +1,4 @@
-
+import os
 import numpy as np
 import scipy.io as sio
 
@@ -23,6 +23,7 @@ def stimulus_to_zero(mat, time_length):
     
     mat['STIMULUS'] = np.zeros((orgchans, int(fs * time_length)))
     
+    #del mat['TEST_PATTERN']
 
     # MAKE SWEEPSEQ LONGER/SHORTER
     for i in range(orgchans):
@@ -35,10 +36,20 @@ def stimulus_to_zero(mat, time_length):
     
     return mat
 
+
+def main():
+    dirr = input("Original bsfile directory >> ")
+    time = input("Desired length (in seconds) >> ")
+
+    files = [os.path.join(dirr, fn) for fn in os.listdir(dirr)]
+
+    for fn in files:
+        longmat = sio.loadmat(fn, mat_dtype=True)
+        longmat = stimulus_to_zero(longmat, time)
+        sio.savemat(fn.replace('.mat', '_{}s_.mat'.format(time)), longmat, do_compression=True)
     
 
 if __name__ == "__main__":
-    longmat = empty(1)
-    
-    sio.savemat('longmattet.mat', longmat)
+    main()
 
+   
