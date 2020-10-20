@@ -1,27 +1,23 @@
 '''
-biosystfiles.py
-Extract traces from Biosyst .mat datafiles.
+Contains wrapper functions for scipy.io to extract
+data traces from Biosyst data/stimulus files.
 '''
 
+import os
 
-import os                   # for joining path names
-import logging
-
-import scipy.io as sio      # for reading .mat files
+import scipy.io as sio
 import numpy as np
-
-
-LOGGER_NAME = 'plugins.biosystfiles'
-module_logger = logging.getLogger(LOGGER_NAME)
-
 
 
 def extract(fn, channel):
     '''
     Extracts data from biosyst datafiles of a specified channel.
     Returns data and fs
+    
+    ARGUMENTS       DESCRIPTION
+    fn              Filename of the .mat file
+    channel         The desired channel of extraction. Starts from 0
     '''
-
 
     # If fn is actually a list of filenames make a recursion
     if type(fn) == type([]) or type(fn) == type((0,0)):
@@ -43,11 +39,7 @@ def __extract_single(fn, channel):
     Called from extract
     '''
     # Open a Biosyst generated file using scipy.io
-    try:
-        mat = sio.loadmat(os.path.join(os.getcwd(), fn))
-    except FileNotFoundError:
-        module_logger.error('Could not find file '+fn+'.') 
-        raise
+    mat = sio.loadmat(os.path.join(os.getcwd(), fn))
 
 
     # If DATAFILE field not found (ie. is not recorded response but 
@@ -70,8 +62,6 @@ def __extract_single(fn, channel):
         fs = int(mat['SAMPRATE'])
         N_channels = int(np.sum(mat['DA_STIM']))
 
-    module_logger.debug('Recording sample rate: '+str(fs)+' Hz')
-    module_logger.debug('Number of recorded channels: '+str(N_channels))
 
     NoT = alldata.shape[1]
     N = alldata.shape[0]
@@ -88,19 +78,16 @@ def __extract_single(fn, channel):
 
     for j, i in enumerate(limits):
         extract[:, j] = alldata[:,i]
-
-    # --------------------------------------
     
-    #if key == 'STIMULUS':
-    #    extract = extract.T
-
     return extract, fs
 
 
 
 def extract_many(fn, channels):
     '''
-    If not SNR recording, extracting many channels may be wanted.
+    Wrapper for extract, extracting many channels at once
+
+    channels        For example, [0,1,4,3]
     '''
     
     ex, fs = extract(fn, channels[0])
@@ -111,24 +98,4 @@ def extract_many(fn, channels):
 
     return ex, fs
 
-
-
-def debug_test(plot=False):
-    
-    if plot:
-        import matplotlib.pyplot as plt
-
-    logging.basicConfig(level=logging.DEBUG)
-
-
-    for fn in ['example_stimulus.mat', 'example_response2.mat']:
-        trace, fs = extract(fn, 0)
-        if plot:
-            plt.plot(trace)
-            plt.show()
-
-    return 0
-
-if __name__ == "__main__":
-    debug_test(True)
 
