@@ -9,7 +9,7 @@ install_requires = [
         ]
 
 setuptools.setup(
-    name="biosystfiles-jkemppainen", # Replace with your own username
+    name="python-biosystfiles", # Replace with your own username
     version="0.0.1",
     author="Joni Kemppainen",
     author_email="jjtkemppainen1@sheffield.ac.uk",
